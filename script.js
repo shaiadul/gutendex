@@ -1,4 +1,5 @@
 let currentPage = 1;
+let loading = false;
 
 async function fetchBooks(page = 1) {
   currentPage = page;
@@ -11,10 +12,36 @@ async function fetchBooks(page = 1) {
   if (search) url += `&search=${search}`;
   if (genre) url += `&topic=${genre}`;
 
-  const response = await fetch(url);
-  const data = await response.json();
-  displayBooks(data.results);
+  showSkeletons(); 
+  loading = true;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    displayBooks(data.results);
+  } catch (error) {
+    console.error("Failed to fetch books:", error);
+  } finally {
+    loading = false;
+  }
 }
+
+function showSkeletons(count = 8) {
+  const container = document.getElementById("book-list");
+  container.innerHTML = "";
+
+  for (let i = 0; i < count; i++) {
+    container.innerHTML += `
+      <div class="bg-white p-4 rounded-lg shadow animate-pulse">
+        <div class="w-full h-40 bg-gray-300 rounded mb-4"></div>
+        <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+        <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+        <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+      </div>
+    `;
+  }
+}
+
 
 function displayBooks(books) {
   const container = document.getElementById("book-list");
